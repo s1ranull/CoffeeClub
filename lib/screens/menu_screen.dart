@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../data/mock_data.dart';
 import '../widgets/product_card.dart';
-import 'cart_screen.dart';
-import 'product_detail_screen.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
@@ -17,12 +16,7 @@ class MenuScreen extends StatelessWidget {
           IconButton(
             tooltip: 'Корзина',
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const CartScreen(),
-                ),
-              );
+              context.push('/menu/cart');
             },
             icon: const Icon(Icons.shopping_cart_outlined),
           ),
@@ -38,7 +32,9 @@ class MenuScreen extends StatelessWidget {
               border: OutlineInputBorder(),
             ),
           ),
+
           const SizedBox(height: 16),
+
           Wrap(
             spacing: 8,
             runSpacing: 8,
@@ -65,25 +61,23 @@ class MenuScreen extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 24),
+
           Text(
             'Меню',
             style: Theme.of(context).textTheme.titleLarge,
           ),
+
           const SizedBox(height: 12),
+
           ...mockProducts.map(
             (product) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: ProductCard(
                 product: product,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          ProductDetailScreen(product: product),
-                    ),
-                  );
+                  context.push('/menu/${product.id}');
                 },
               ),
             ),

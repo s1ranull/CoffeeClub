@@ -2,17 +2,30 @@ import 'package:flutter/material.dart';
 
 import '../data/mock_data.dart';
 
-class ProductDetailScreen extends StatelessWidget {
-  final Product product;
+class ProductDetailScreen extends StatefulWidget {
+  final int productId;
 
   const ProductDetailScreen({
     super.key,
-    required this.product,
+    required this.productId,
   });
+
+  @override
+  State<ProductDetailScreen> createState() =>
+      _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState
+    extends State<ProductDetailScreen> {
+  String _selectedSize = 'M';
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+
+    final product = mockProducts.firstWhere(
+      (product) => product.id == widget.productId,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -30,31 +43,47 @@ class ProductDetailScreen extends StatelessWidget {
             child: Icon(
               product.category == 'Десерты'
                   ? Icons.cake_outlined
-                  : Icons.local_cafe,
+                  : product.category == 'Чай'
+                      ? Icons.emoji_food_beverage_outlined
+                      : Icons.local_cafe,
               size: 100,
               color: scheme.onPrimaryContainer,
             ),
           ),
+
           const SizedBox(height: 24),
+
           Text(
             product.name,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            style: Theme.of(context)
+                .textTheme
+                .headlineSmall
+                ?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
           ),
+
           const SizedBox(height: 6),
+
           Text(
             product.category,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(
                   color: scheme.primary,
                 ),
           ),
+
           const SizedBox(height: 20),
+
           Text(
             product.description,
             style: Theme.of(context).textTheme.bodyLarge,
           ),
+
           const SizedBox(height: 24),
+
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -67,7 +96,10 @@ class ProductDetailScreen extends StatelessWidget {
                   ),
                   Text(
                     '${product.price.toStringAsFixed(0)} MDL',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
@@ -75,35 +107,44 @@ class ProductDetailScreen extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+
+          const SizedBox(height: 20),
+
           Text(
             'Размер',
             style: Theme.of(context).textTheme.titleMedium,
           ),
+
           const SizedBox(height: 8),
+
           Wrap(
             spacing: 8,
             children: [
-              ChoiceChip(
-                label: const Text('S'),
-                selected: false,
-                onSelected: (_) {},
-              ),
-              ChoiceChip(
-                label: const Text('M'),
-                selected: true,
-                onSelected: (_) {},
-              ),
-              ChoiceChip(
-                label: const Text('L'),
-                selected: false,
-                onSelected: (_) {},
-              ),
+              for (final size in ['S', 'M', 'L'])
+                ChoiceChip(
+                  label: Text(size),
+                  selected: _selectedSize == size,
+                  onSelected: (_) {
+                    setState(() {
+                      _selectedSize = size;
+                    });
+                  },
+                ),
             ],
           ),
+
           const SizedBox(height: 32),
+
           FilledButton.icon(
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '${product.name}, размер $_selectedSize добавлен в корзину',
+                  ),
+                ),
+              );
+            },
             icon: const Icon(Icons.add_shopping_cart),
             label: const Text('Добавить в корзину'),
           ),

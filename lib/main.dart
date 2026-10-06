@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
+import 'router.dart';
 
 void main() {
   runApp(const CoffeeClubApp());
@@ -10,9 +10,10 @@ class CoffeeClubApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'CoffeeClub',
+
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
@@ -24,7 +25,8 @@ class CoffeeClubApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const LoginScreen(),
+
+      routerConfig: router,
     );
   }
-} 
+}

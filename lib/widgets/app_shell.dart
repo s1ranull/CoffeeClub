@@ -1,41 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
-import '../screens/loyalty_points_screen.dart';
-import '../screens/menu_screen.dart';
-import '../screens/order_history_screen.dart';
-import '../screens/profile_screen.dart';
+class AppShell extends StatelessWidget {
+  final StatefulNavigationShell navigationShell;
 
-class MainShell extends StatefulWidget {
-  const MainShell({super.key});
-
-  @override
-  State<MainShell> createState() => _MainShellState();
-}
-
-class _MainShellState extends State<MainShell> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = const [
-    MenuScreen(),
-    OrderHistoryScreen(),
-    LoyaltyPointsScreen(),
-    ProfileScreen(),
-  ];
+  const AppShell({
+    super.key,
+    required this.navigationShell,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
+      body: navigationShell,
+
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
+        selectedIndex: navigationShell.currentIndex,
+
         onDestinationSelected: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
+          navigationShell.goBranch(index);
         },
+
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.restaurant_menu_outlined),
