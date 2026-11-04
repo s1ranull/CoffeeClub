@@ -1,6 +1,5 @@
 import 'result.dart';
 
-// Общий переключатель аварии для всех mock-repository.
 class MockNetwork {
   bool simulateError = false;
 

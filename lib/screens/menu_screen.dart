@@ -20,7 +20,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final catalog = context.watch<CatalogModel>(); // watch в build.
+    final catalog = context.watch<CatalogModel>();
     final filtered = catalog.products.where((p) =>
         (_category == 'Все' || p.category == _category) &&
         p.name.toLowerCase().contains(_search.toLowerCase())).toList();

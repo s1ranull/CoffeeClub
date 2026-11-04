@@ -35,7 +35,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final cart = context.read<CartModel>();
     final loyalty = context.read<LoyaltyModel>();
     if (cart.isEmpty) return;
-    final lines = cart.lines; // Снимок заказа: список защищён от внешней мутации.
+    final lines = cart.lines;
     final discount = widget.usePoints
         ? math.min(loyalty.balance, cart.total.floor()) : 0;
     final total = cart.total - discount;
@@ -62,7 +62,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(error ?? 'Не удалось оформить заказ')));
-      return; // Форма и корзина остаются без изменений при отказе.
+      return;
     }
 
     String? bonusError;

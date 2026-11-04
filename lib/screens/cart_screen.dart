@@ -16,7 +16,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  bool _usePoints = false; // Эфемерный выбор только этого экрана.
+  bool _usePoints = false;
 
   @override
   Widget build(BuildContext context) {

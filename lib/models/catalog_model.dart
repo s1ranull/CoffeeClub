@@ -6,7 +6,7 @@ import '../data/result.dart';
 
 class CatalogModel extends ChangeNotifier {
   CatalogModel(this._repository);
-  final ProductRepository _repository; // Внедрение зависимости, без создания mock здесь.
+  final ProductRepository _repository;
 
   List<Product> _products = [];
   bool _loading = false;

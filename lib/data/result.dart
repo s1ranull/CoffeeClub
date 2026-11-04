@@ -1,4 +1,3 @@
-// Ожидаемые ошибки возвращаем как значения, не бросаем в UI исключения.
 sealed class Result<T> { const Result(); }
 
 final class Ok<T> extends Result<T> {

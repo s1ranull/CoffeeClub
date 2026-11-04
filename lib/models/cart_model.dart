@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import '../data/cart_line.dart';
 import '../data/product.dart';
 
-// Корзина разделяется между каталогом, деталями, корзиной и оформлением.
 class CartModel extends ChangeNotifier {
   final List<CartLine> _lines = [];
 

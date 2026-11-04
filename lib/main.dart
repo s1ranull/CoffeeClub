@@ -16,7 +16,6 @@ import 'models/session_model.dart';
 import 'router.dart';
 
 void main() {
-  // Единственное место выбора источника данных. На L5 mock заменяется API.
   final network = MockNetwork();
   final products = MockProductRepository(network);
   final orders = MockOrderRepository(network);

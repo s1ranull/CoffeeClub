@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-// Локальная сессия L3: без backend-а и хранения пароля.
 class SessionModel extends ChangeNotifier {
   String? _email;
   String get name => 'Илья Ведерников';
