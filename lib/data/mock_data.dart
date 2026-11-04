@@ -1,56 +1,6 @@
-class Product {
-  final int id;
-  final String name;
-  final double price;
-  final String category;
-  final String imageUrl;
-  final String description;
-
-  const Product({
-    required this.id,
-    required this.name,
-    required this.price,
-    required this.category,
-    required this.imageUrl,
-    required this.description,
-  });
-}
-
-class Order {
-  final int id;
-  final int userId;
-  final String items;
-  final double total;
-  final String status;
-  final String createdAt;
-
-  const Order({
-    required this.id,
-    required this.userId,
-    required this.items,
-    required this.total,
-    required this.status,
-    required this.createdAt,
-  });
-}
-
-class LoyaltyPoint {
-  final int id;
-  final int userId;
-  final int? orderId;
-  final int points;
-  final String description;
-  final String earnedAt;
-
-  const LoyaltyPoint({
-    required this.id,
-    required this.userId,
-    this.orderId,
-    required this.points,
-    required this.description,
-    required this.earnedAt,
-  });
-}
+import 'loyalty_point.dart';
+import 'order.dart';
+import 'product.dart';
 
 const mockProducts = [
   Product(
@@ -179,6 +129,13 @@ const mockOrders = [
 ];
 
 const mockLoyaltyHistory = [
+  LoyaltyPoint(
+    id: 7,
+    userId: 1,
+    points: 131,
+    description: 'Приветственные и накопленные баллы',
+    earnedAt: '26.09.2026',
+  ),
   LoyaltyPoint(
     id: 1,
     userId: 1,

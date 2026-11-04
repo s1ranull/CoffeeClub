@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
+import '../models/loyalty_model.dart';
+import '../widgets/error_view.dart';
 
 class LoyaltyPointsScreen extends StatelessWidget {
   const LoyaltyPointsScreen({super.key});
@@ -8,12 +10,21 @@ class LoyaltyPointsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final loyalty = context.watch<LoyaltyModel>();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Мои баллы'),
+        actions: [
+          IconButton(tooltip: 'Обновить', icon: const Icon(Icons.refresh),
+              onPressed: () => context.read<LoyaltyModel>().load()),
+        ],
       ),
-      body: ListView(
+      body: loyalty.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : loyalty.error != null
+              ? ErrorView(message: loyalty.error!, onRetry: () => context.read<LoyaltyModel>().load())
+          : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           Card(
@@ -29,7 +40,7 @@ class LoyaltyPointsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '124',
+                      '${loyalty.balance}',
                     style:
                         Theme.of(context).textTheme.displaySmall?.copyWith(
                               fontWeight: FontWeight.bold,
@@ -52,7 +63,7 @@ class LoyaltyPointsScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 12),
-          ...mockLoyaltyHistory.map(
+          ...loyalty.history.map(
             (entry) {
               final positive = entry.points > 0;
 

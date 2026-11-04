@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-class ProfileScreen extends StatelessWidget {
+import '../data/mock_network.dart';
+import '../models/loyalty_model.dart';
+import '../models/session_model.dart';
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _logout(BuildContext context) async {
     final ok = await showDialog<bool>(
@@ -32,6 +43,7 @@ class ProfileScreen extends StatelessWidget {
     );
 
     if (ok == true && context.mounted) {
+      context.read<SessionModel>().logout();
       context.go('/login');
     }
   }
@@ -39,6 +51,9 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final loyalty = context.watch<LoyaltyModel>();
+    final failure = context.watch<MockNetwork>();
+    final session = context.watch<SessionModel>();
 
     return Scaffold(
       appBar: AppBar(
@@ -54,9 +69,9 @@ class ProfileScreen extends StatelessWidget {
                   scheme.primaryContainer,
               foregroundColor:
                   scheme.onPrimaryContainer,
-              child: const Text(
-                'IV',
-                style: TextStyle(
+              child: Text(
+                session.initials,
+                style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
@@ -67,7 +82,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 16),
 
           Text(
-            'Илья Ведерников',
+            session.name,
             textAlign: TextAlign.center,
             style:
                 Theme.of(context).textTheme.titleLarge,
@@ -76,7 +91,7 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 4),
 
           Text(
-            'ilya@example.com',
+            session.email,
             textAlign: TextAlign.center,
             style:
                 Theme.of(context).textTheme.bodyMedium,
@@ -84,33 +99,48 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 32),
 
-          const Card(
+          Card(
             child: Column(
               children: [
                 ListTile(
                   leading:
-                      Icon(Icons.email_outlined),
-                  title: Text('E-mail'),
-                  subtitle:
-                      Text('ilya@example.com'),
+                      const Icon(Icons.email_outlined),
+                  title: const Text('E-mail'),
+                  subtitle: Text(session.email),
                 ),
-                Divider(height: 1),
+                const Divider(height: 1),
                 ListTile(
                   leading:
-                      Icon(Icons.phone_outlined),
-                  title: Text('Телефон'),
-                  subtitle:
-                      Text('+373 60 123 456'),
+                      const Icon(Icons.phone_outlined),
+                  title: const Text('Телефон'),
+                  subtitle: Text(session.phone),
                 ),
-                Divider(height: 1),
+                const Divider(height: 1),
                 ListTile(
-                  leading:
-                      Icon(Icons.stars_outlined),
-                  title:
-                      Text('Бонусный баланс'),
-                  subtitle: Text('124 балла'),
+                  leading: const Icon(Icons.stars_outlined),
+                  title: const Text('Бонусный баланс'),
+                  subtitle: Text(loyalty.isLoading ? 'Загрузка...'
+                      : loyalty.error != null ? 'Ошибка получения баллов'
+                      : '${loyalty.balance} баллов'),
+                  trailing: loyalty.error != null
+                      ? IconButton(icon: const Icon(Icons.refresh),
+                          onPressed: () => context.read<LoyaltyModel>().load())
+                      : null,
                 ),
               ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          Card(
+            child: SwitchListTile(
+              secondary: const Icon(Icons.wifi_off_outlined),
+              title: const Text('Симулировать сбой сети'),
+              subtitle: const Text('Для демонстрации загрузки, ошибки и Retry на L4'),
+              value: failure.simulateError,
+              onChanged: (value) => setState(() =>
+                  context.read<MockNetwork>().simulateError = value),
             ),
           ),
 

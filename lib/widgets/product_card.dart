@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/mock_data.dart';
+import '../data/product.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;

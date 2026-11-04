@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
+import '../models/order_model.dart';
+import '../widgets/error_view.dart';
 import '../widgets/order_status_badge.dart';
 
 class OrderHistoryScreen extends StatelessWidget {
@@ -8,16 +10,27 @@ class OrderHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final model = context.watch<OrderModel>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('История заказов'),
+        actions: [
+          IconButton(tooltip: 'Обновить', icon: const Icon(Icons.refresh),
+              onPressed: () => context.read<OrderModel>().load()),
+        ],
       ),
-      body: ListView.separated(
+      body: model.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : model.error != null
+              ? ErrorView(message: model.error!, onRetry: () => context.read<OrderModel>().load())
+          : model.orders.isEmpty
+              ? const Center(child: Text('Заказов пока нет'))
+          : ListView.separated(
         padding: const EdgeInsets.all(16),
-        itemCount: mockOrders.length,
+        itemCount: model.orders.length,
         separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
-          final order = mockOrders[index];
+          final order = model.orders[index];
 
           return Card(
             child: Padding(

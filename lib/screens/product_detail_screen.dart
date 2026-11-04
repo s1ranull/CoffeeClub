@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
-import '../data/mock_data.dart';
+import '../models/cart_model.dart';
+import '../models/catalog_model.dart';
+import '../widgets/error_view.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -19,17 +23,56 @@ class _ProductDetailScreenState
     extends State<ProductDetailScreen> {
   String _selectedSize = 'M';
 
+  Future<void> _delete() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Удалить товар?'),
+        content: const Text('Он исчезнет из меню и корзины.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Отмена')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Удалить')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final error = await context.read<CatalogModel>().remove(widget.productId);
+    if (!mounted) return;
+    if (error != null) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      return;
+    }
+    context.read<CartModel>().removeProduct(widget.productId);
+    context.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-
-    final product = mockProducts.firstWhere(
-      (product) => product.id == widget.productId,
-    );
+    final catalog = context.watch<CatalogModel>();
+    if (catalog.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (catalog.error != null) {
+      return Scaffold(body: ErrorView(message: catalog.error!,
+        onRetry: () => context.read<CatalogModel>().load()));
+    }
+    final product = catalog.byId(widget.productId);
+    if (product == null) {
+      return const Scaffold(body: Center(child: Text('Товар не существует')));
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(product.name),
+        actions: [
+          IconButton(tooltip: 'Редактировать', icon: const Icon(Icons.edit_outlined),
+              onPressed: () => context.push('/menu/${product.id}/edit')),
+          IconButton(tooltip: 'Удалить', icon: const Icon(Icons.delete_outline),
+              onPressed: _delete),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
@@ -137,6 +180,7 @@ class _ProductDetailScreenState
 
           FilledButton.icon(
             onPressed: () {
+              context.read<CartModel>().add(product, size: _selectedSize);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(

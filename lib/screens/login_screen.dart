@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import '../models/session_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -27,6 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    context.read<SessionModel>().login(_emailController.text);
     context.go('/menu');
   }
 

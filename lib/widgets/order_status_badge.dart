@@ -10,6 +10,8 @@ class OrderStatusBadge extends StatelessWidget {
 
   IconData _getIcon() {
     switch (status) {
+      case 'Принят':
+        return Icons.receipt_long_outlined;
       case 'Готов':
         return Icons.check_circle_outline;
       case 'Готовится':
