@@ -8,6 +8,14 @@ class LoyaltyModel extends ChangeNotifier {
   LoyaltyModel(this._repository);
   final LoyaltyRepository _repository;
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   List<LoyaltyPoint> _history = [];
   bool _loading = false;
   String? _error;
@@ -19,14 +27,14 @@ class LoyaltyModel extends ChangeNotifier {
   Future<void> load() async {
     _loading = true;
     _error = null;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
     try {
       switch (await _repository.fetchAll()) {
         case Ok(:final value): _history = value;
         case Err(:final msg): _error = msg;
       }
     } catch (_) { _error = 'Не удалось загрузить бонусы'; }
-    finally { _loading = false; notifyListeners(); }
+    finally { _loading = false; if (!_disposed) notifyListeners(); }
   }
 
   Future<String?> record({required int orderId, required int points,
@@ -39,7 +47,7 @@ class LoyaltyModel extends ChangeNotifier {
       switch (await _repository.create(draft)) {
         case Ok(:final value):
           _history = [value, ..._history];
-          notifyListeners();
+          if (!_disposed) notifyListeners();
           return null;
         case Err(:final msg): return msg;
       }

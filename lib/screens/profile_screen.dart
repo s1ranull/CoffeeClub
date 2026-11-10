@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../data/mock_network.dart';
+import '../data/api.dart';
 import '../models/loyalty_model.dart';
-import '../models/session_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -43,8 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (ok == true && context.mounted) {
-      context.read<SessionModel>().logout();
-      context.go('/login');
+      await context.read<Api>().logout();
     }
   }
 
@@ -52,8 +49,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final loyalty = context.watch<LoyaltyModel>();
-    final failure = context.watch<MockNetwork>();
-    final session = context.watch<SessionModel>();
+    final session = context.watch<Api>();
+    final initials = session.name.trim().split(RegExp(r'\s+'))
+        .where((word) => word.isNotEmpty)
+        .take(2)
+        .map((word) => word.characters.first)
+        .join()
+        .toUpperCase();
 
     return Scaffold(
       appBar: AppBar(
@@ -70,7 +72,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               foregroundColor:
                   scheme.onPrimaryContainer,
               child: Text(
-                session.initials,
+                initials,
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -113,7 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   leading:
                       const Icon(Icons.phone_outlined),
                   title: const Text('Телефон'),
-                  subtitle: Text(session.phone),
+                  subtitle: const Text('Не указан'),
                 ),
                 const Divider(height: 1),
                 ListTile(
@@ -128,19 +130,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       : null,
                 ),
               ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          Card(
-            child: SwitchListTile(
-              secondary: const Icon(Icons.wifi_off_outlined),
-              title: const Text('Симулировать сбой сети'),
-              subtitle: const Text('Для демонстрации загрузки, ошибки и Retry на L4'),
-              value: failure.simulateError,
-              onChanged: (value) => setState(() =>
-                  context.read<MockNetwork>().simulateError = value),
             ),
           ),
 

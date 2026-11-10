@@ -1,4 +1,7 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+
+import 'data/api.dart';
 
 import 'screens/cart_screen.dart';
 import 'screens/checkout_screen.dart';
@@ -11,8 +14,14 @@ import 'screens/product_form_screen.dart';
 import 'screens/profile_screen.dart';
 import 'widgets/app_shell.dart';
 
-final router = GoRouter(
-  initialLocation: '/login',
+GoRouter createRouter(Api api, Widget Function(Widget) sessionScope) => GoRouter(
+  initialLocation: api.signedIn ? '/menu' : '/login',
+  refreshListenable: api,
+  redirect: (context, state) {
+    final onLogin = state.matchedLocation == '/login';
+    if (!api.signedIn) return onLogin ? null : '/login';
+    return onLogin ? '/menu' : null;
+  },
   routes: [
     GoRoute(
       path: '/login',
@@ -21,9 +30,7 @@ final router = GoRouter(
 
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        return AppShell(
-          navigationShell: navigationShell,
-        );
+        return sessionScope(AppShell(navigationShell: navigationShell));
       },
       branches: [
         StatefulShellBranch(

@@ -15,15 +15,19 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  String _search = '';
+  final _search = TextEditingController();
+
+  @override
+  void dispose() {
+    _search.dispose();
+    super.dispose();
+  }
   String _category = 'Все';
 
   @override
   Widget build(BuildContext context) {
     final catalog = context.watch<CatalogModel>();
-    final filtered = catalog.products.where((p) =>
-        (_category == 'Все' || p.category == _category) &&
-        p.name.toLowerCase().contains(_search.toLowerCase())).toList();
+    final products = catalog.products;
 
     return Scaffold(
       appBar: AppBar(
@@ -63,11 +67,18 @@ class _MenuScreenState extends State<MenuScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     TextField(
-                      onChanged: (text) => setState(() => _search = text),
-                      decoration: const InputDecoration(
+                      controller: _search,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (text) => catalog.load(search: text),
+                      decoration: InputDecoration(
                         hintText: 'Поиск напитка или десерта',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.search),
+                        suffixIcon: IconButton(
+                          tooltip: 'Найти',
+                          icon: const Icon(Icons.arrow_forward),
+                          onPressed: () => catalog.load(search: _search.text),
+                        ),
+                        border: const OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -79,23 +90,39 @@ class _MenuScreenState extends State<MenuScreen> {
                           FilterChip(
                             label: Text(category),
                             selected: _category == category,
-                            onSelected: (_) => setState(() => _category = category),
+                            onSelected: (_) {
+                              setState(() => _category = category);
+                              catalog.load(category: category);
+                            },
                           ),
                       ],
                     ),
                     const SizedBox(height: 24),
-                    Text('Меню · ${filtered.length}',
+                    Text('Меню · ${products.length}',
                         style: Theme.of(context).textTheme.titleLarge),
                     const SizedBox(height: 12),
-                    if (filtered.isEmpty)
+                    if (products.isEmpty)
                       const Padding(padding: EdgeInsets.all(36),
                           child: Center(child: Text('Ничего не найдено'))),
-                    for (final product in filtered)
+                    for (final product in products)
                       Padding(
                         key: ValueKey(product.id),
                         padding: const EdgeInsets.only(bottom: 8),
                         child: ProductCard(product: product,
                             onTap: () => context.push('/menu/${product.id}')),
+                      ),
+                    if (catalog.moreError != null)
+                      Text(catalog.moreError!, textAlign: TextAlign.center),
+                    if (catalog.hasMore)
+                      Center(
+                        child: catalog.isLoadingMore
+                            ? const CircularProgressIndicator()
+                            : OutlinedButton(
+                                onPressed: catalog.loadMore,
+                                child: Text(catalog.moreError == null
+                                    ? 'Показать ещё'
+                                    : 'Повторить загрузку'),
+                              ),
                       ),
                   ],
                 ),

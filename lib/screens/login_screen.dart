@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../models/session_model.dart';
+import '../data/api.dart';
+import '../data/result.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,21 +17,32 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  final _nameController = TextEditingController();
+  bool _register = false;
+  bool _busy = false;
+
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
 
     super.dispose();
   }
 
-  void _login() {
-    if (!_formKey.currentState!.validate()) {
-      return;
+  Future<void> _login() async {
+    if (_busy || !_formKey.currentState!.validate()) return;
+    setState(() => _busy = true);
+    final result = await context.read<Api>().login(
+      _emailController.text.trim(),
+      _passwordController.text,
+      name: _register ? _nameController.text.trim() : null,
+    );
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (result case Err(:final msg)) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     }
-
-    context.read<SessionModel>().login(_emailController.text);
-    context.go('/menu');
   }
 
   @override
@@ -83,8 +94,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 40),
 
+                    if (_register) ...[
+                      TextFormField(
+                        controller: _nameController,
+                        enabled: !_busy,
+                        decoration: const InputDecoration(
+                          labelText: 'Имя',
+                          border: OutlineInputBorder(),
+                        ),
+                        validator: (value) => value == null || value.trim().isEmpty
+                            ? 'Введите имя'
+                            : null,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     TextFormField(
                       controller: _emailController,
+                      enabled: !_busy,
                       keyboardType:
                           TextInputType.emailAddress,
                       textInputAction:
@@ -113,6 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     TextFormField(
                       controller: _passwordController,
+                      enabled: !_busy,
                       obscureText: true,
                       textInputAction:
                           TextInputAction.done,
@@ -140,18 +167,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 24),
 
                     FilledButton.icon(
-                      onPressed: _login,
+                      onPressed: _busy ? null : _login,
                       icon: const Icon(Icons.login),
-                      label: const Text('Войти'),
+                      label: Text(_busy ? 'Подождите...' : _register ? 'Создать аккаунт' : 'Войти'),
                     ),
 
                     const SizedBox(height: 8),
 
                     TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'Нет аккаунта? Зарегистрируйтесь',
-                      ),
+                      onPressed: _busy ? null : () => setState(() => _register = !_register),
+                      child: Text(_register ? 'Уже есть аккаунт? Войти'
+                          : 'Нет аккаунта? Зарегистрируйтесь'),
                     ),
                   ],
                 ),

@@ -8,6 +8,14 @@ class OrderModel extends ChangeNotifier {
   OrderModel(this._repository);
   final OrderRepository _repository;
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
   List<Order> _orders = [];
   bool _loading = false;
   String? _error;
@@ -18,14 +26,14 @@ class OrderModel extends ChangeNotifier {
   Future<void> load() async {
     _loading = true;
     _error = null;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
     try {
       switch (await _repository.fetchAll()) {
         case Ok(:final value): _orders = value;
         case Err(:final msg): _error = msg;
       }
     } catch (_) { _error = 'Не удалось загрузить историю заказов'; }
-    finally { _loading = false; notifyListeners(); }
+    finally { _loading = false; if (!_disposed) notifyListeners(); }
   }
 
   Future<(Order?, String?)> place(Order draft) async {
@@ -33,7 +41,7 @@ class OrderModel extends ChangeNotifier {
       switch (await _repository.create(draft)) {
         case Ok(:final value):
           _orders = [value, ..._orders];
-          notifyListeners();
+          if (!_disposed) notifyListeners();
           return (value, null);
         case Err(:final msg): return (null, msg);
       }
@@ -45,7 +53,7 @@ class OrderModel extends ChangeNotifier {
       switch (await _repository.delete(id)) {
         case Ok<void>():
           _orders = _orders.where((o) => o.id != id).toList();
-          notifyListeners();
+          if (!_disposed) notifyListeners();
           return null;
         case Err<void>(:final msg): return msg;
       }

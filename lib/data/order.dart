@@ -19,6 +19,25 @@ class Order {
     this.phone = '',
   });
 
+  factory Order.fromJson(Map<String, dynamic> json) => Order(
+    id: json['id'] as int,
+    userId: json['userId'] as int,
+    items: json['items'] as String,
+    total: (json['total'] as num).toDouble(),
+    status: json['status'] as String,
+    createdAt: json['createdAt'] as String,
+    customerName: json['customerName'] as String,
+    phone: json['phone'] as String,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'items': items,
+    'total': total,
+    'status': status,
+    'customerName': customerName,
+    'phone': phone,
+  };
+
   Order copyWith({int? id, int? userId, String? items, double? total,
       String? status, String? createdAt, String? customerName, String? phone}) =>
       Order(

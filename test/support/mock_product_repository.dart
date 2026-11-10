@@ -1,8 +1,9 @@
 import 'mock_data.dart';
 import 'mock_network.dart';
-import 'product.dart';
-import 'product_repository.dart';
-import 'result.dart';
+
+import 'package:coffee_club/data/product.dart';
+import 'package:coffee_club/data/product_repository.dart';
+import 'package:coffee_club/data/result.dart';
 
 class MockProductRepository implements ProductRepository {
   MockProductRepository(this._network);
@@ -10,10 +11,21 @@ class MockProductRepository implements ProductRepository {
   final List<Product> _products = List.of(mockProducts);
 
   @override
-  Future<Result<List<Product>>> fetchAll() async {
+  Future<Result<List<Product>>> fetchAll({
+    int page = 1,
+    int limit = 20,
+    String? search,
+    String? category,
+  }) async {
     final failure = await _network.check<List<Product>>();
     if (failure != null) return failure;
-    return Ok(List.unmodifiable(_products));
+    final query = search?.toLowerCase() ?? '';
+    final products = _products.where(
+      (item) =>
+          (category == null || item.category == category) &&
+          item.name.toLowerCase().contains(query),
+    );
+    return Ok(List.unmodifiable(products.skip((page - 1) * limit).take(limit)));
   }
 
   @override
@@ -30,7 +42,8 @@ class MockProductRepository implements ProductRepository {
   Future<Result<Product>> create(Product product) async {
     final failure = await _network.check<Product>();
     if (failure != null) return failure;
-    final nextId = _products.fold<int>(0, (max, p) => p.id > max ? p.id : max) + 1;
+    final nextId =
+        _products.fold<int>(0, (max, p) => p.id > max ? p.id : max) + 1;
     final saved = product.copyWith(id: nextId);
     _products.add(saved);
     return Ok(saved);

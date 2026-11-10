@@ -15,6 +15,21 @@ class LoyaltyPoint {
     required this.earnedAt,
   });
 
+  factory LoyaltyPoint.fromJson(Map<String, dynamic> json) => LoyaltyPoint(
+    id: json['id'] as int,
+    userId: json['userId'] as int,
+    orderId: json['orderId'] as int?,
+    points: json['points'] as int,
+    description: json['description'] as String,
+    earnedAt: json['earnedAt'] as String,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'orderId': orderId,
+    'points': points,
+    'description': description,
+  };
+
   LoyaltyPoint copyWith({int? id, int? userId, int? orderId,
       int? points, String? description, String? earnedAt}) => LoyaltyPoint(
         id: id ?? this.id,

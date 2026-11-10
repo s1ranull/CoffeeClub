@@ -1,24 +1,14 @@
-import 'package:coffee_club/data/mock_network.dart';
-import 'package:coffee_club/data/mock_product_repository.dart';
+import 'support/mock_network.dart';
+import 'support/mock_product_repository.dart';
 import 'package:coffee_club/data/product.dart';
 import 'package:coffee_club/data/result.dart';
 import 'package:coffee_club/models/cart_model.dart';
 import 'package:coffee_club/models/catalog_model.dart';
-import 'package:coffee_club/models/session_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const coffee = Product(id: 1, name: 'Test Latte', price: 50,
       category: 'Кофе', imageUrl: '', description: 'Тестовый напиток');
-
-  test('Local login state is shared and cleared on logout', () {
-    final session = SessionModel();
-    session.login('  ilya@example.com  ');
-    expect(session.email, 'ilya@example.com');
-    session.logout();
-    expect(session.email, 'E-mail не указан');
-    session.dispose();
-  });
 
   test('CartModel notifies and exposes immutable lines', () {
     final cart = CartModel();
